@@ -22,3 +22,7 @@ This project is built strictly according to `PROJECT_PLAN.md`. Read it before do
   - Never commit/push: `.env` (secrets/local config — only `.env.example` is tracked), `node_modules/`, Python `__pycache__`/`.venv`, build output (`dist/`), `.DS_Store`, `.claude/settings.local.json` (machine-specific), or any DB dumps/volumes. Rely on `.gitignore`; double-check `git status` before pushing.
 - This machine only has a standalone `docker-compose` binary, not the `docker compose` plugin. Always use `docker-compose` (with the hyphen) in commands and docs for this project.
 - UI strings in English, always through i18next (`en.json`).
+
+## External docs / research
+- OpenSky Network API documentation is reachable via the `context7` MCP server. Their docs site has several sections (REST API, Trino client, Python API, Java API, etc.) — for this project only the **REST API** section is relevant (that's what `run_ingest.py` calls directly over HTTP); the others are alternative client libraries we don't use.
+- Ask before using context7 only when you're actually unsure how to do something (API params, auth, response shape, library usage) — if you already know, don't ask, just proceed. This also applies mid-debugging: if an implementation looks correct but isn't producing the expected result, that's a good signal to ask and check context7 in case the external API/library changed since training.
