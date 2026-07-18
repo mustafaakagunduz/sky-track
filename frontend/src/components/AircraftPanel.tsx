@@ -79,8 +79,15 @@ export default function AircraftPanel() {
 
       <div className="overflow-y-auto">
         {rows.length === 0 ? (
-          <div className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
-            {t("panel.empty")}
+          <div className="flex flex-col items-center gap-2 px-3 py-10 text-center text-slate-500 dark:text-slate-400">
+            {Object.keys(aircraft).length === 0 && wsStatus !== "connected" ? (
+              <>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                <span>{t("panel.waiting")}</span>
+              </>
+            ) : (
+              <span>{t("panel.empty")}</span>
+            )}
           </div>
         ) : (
           <table className="w-full text-left text-xs">

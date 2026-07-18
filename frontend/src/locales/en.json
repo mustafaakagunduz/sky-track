@@ -12,6 +12,7 @@
     "allTypes": "All types",
     "allClasses": "All classes",
     "empty": "No aircraft match the current filters.",
+    "waiting": "Waiting for live data…",
     "columnCallsign": "Callsign",
     "columnType": "Type",
     "columnClass": "Class",

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import AircraftPanel from "./components/AircraftPanel";
+import Brand from "./components/Brand";
 import DetailCard from "./components/DetailCard";
 import Map from "./components/Map";
 import RadiusSearchControl from "./components/RadiusSearchControl";
@@ -13,6 +14,7 @@ export default function App() {
   return (
     <div className="relative h-full w-full">
       <Map />
+      <Brand />
       <AircraftPanel />
       <DetailCard />
       <div className="pointer-events-none absolute bottom-4 left-4 z-10">

@@ -46,7 +46,7 @@ export default function DetailCard() {
   if (!selectedCallsign) return null;
 
   return (
-    <div className="pointer-events-auto absolute left-4 top-4 z-10 w-72 rounded-md border border-slate-200 bg-white/90 text-sm text-slate-900 shadow-lg backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100">
+    <div className="animate-fade-in-up pointer-events-auto absolute left-4 top-16 z-10 w-72 rounded-md border border-slate-200 bg-white/90 text-sm text-slate-900 shadow-lg backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100">
       <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2 dark:border-slate-700">
         <span className="font-semibold">{selectedCallsign}</span>
         <button
