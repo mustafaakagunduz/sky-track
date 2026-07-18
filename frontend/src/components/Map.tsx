@@ -8,7 +8,12 @@ import { useThemeStore, type Theme } from "../store/themeStore";
 
 const AIRCRAFT_SOURCE_ID = "aircraft";
 const AIRCRAFT_LAYER_ID = "aircraft-layer";
-const AIRCRAFT_ICON_ID = "aircraft-triangle";
+const AIRCRAFT_ICON_ID: Record<string, string> = {
+  MILITARY: "aircraft-icon-military",
+  COMMERCIAL: "aircraft-icon-commercial",
+  DRONE: "aircraft-icon-drone",
+  UNKNOWN: "aircraft-icon-unknown",
+};
 const TRAIL_SOURCE_ID = "trail";
 const TRAIL_LAYER_ID = "trail-layer";
 const CIRCLE_SOURCE_ID = "nearby-circle";
@@ -24,21 +29,120 @@ const CLASSIFICATION_COLOR: Record<string, string> = {
 
 const EARTH_RADIUS_KM = 6371;
 
-function buildTriangleIcon(): ImageData {
-  const size = 32;
+const ICON_SIZE = 32;
+
+function newIconCanvas() {
   const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = ICON_SIZE;
+  canvas.height = ICON_SIZE;
   const ctx = canvas.getContext("2d")!;
-  ctx.beginPath();
-  ctx.moveTo(size / 2, 2);
-  ctx.lineTo(size - 4, size - 4);
-  ctx.lineTo(4, size - 4);
-  ctx.closePath();
   ctx.fillStyle = "white";
-  ctx.fill();
-  return ctx.getImageData(0, 0, size, size);
+  return ctx;
 }
+
+function fillPolygon(ctx: CanvasRenderingContext2D, points: [number, number][]) {
+  ctx.beginPath();
+  points.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
+  ctx.closePath();
+  ctx.fill();
+}
+
+// Plain triangle, used when aircraft type is not known.
+function buildUnknownIcon(): ImageData {
+  const ctx = newIconCanvas();
+  fillPolygon(ctx, [
+    [16, 2],
+    [28, 28],
+    [4, 28],
+  ]);
+  return ctx.getImageData(0, 0, ICON_SIZE, ICON_SIZE);
+}
+
+// Classic airplane top-view silhouette: straight fuselage, wings roughly centered.
+function buildCommercialIcon(): ImageData {
+  const ctx = newIconCanvas();
+  fillPolygon(ctx, [
+    [16, 1],
+    [19, 9],
+    [30, 19],
+    [30, 22],
+    [19, 17],
+    [19, 24],
+    [24, 29],
+    [24, 31],
+    [16, 28],
+    [8, 31],
+    [8, 29],
+    [13, 24],
+    [13, 17],
+    [2, 22],
+    [2, 19],
+    [13, 9],
+  ]);
+  return ctx.getImageData(0, 0, ICON_SIZE, ICON_SIZE);
+}
+
+// Fighter-jet silhouette: narrower fuselage, wings swept further back.
+function buildMilitaryIcon(): ImageData {
+  const ctx = newIconCanvas();
+  fillPolygon(ctx, [
+    [16, 1],
+    [18, 11],
+    [30, 23],
+    [30, 25],
+    [18, 20],
+    [18, 26],
+    [22, 30],
+    [22, 31],
+    [16, 29],
+    [10, 31],
+    [10, 30],
+    [14, 26],
+    [14, 20],
+    [2, 25],
+    [2, 23],
+    [14, 11],
+  ]);
+  return ctx.getImageData(0, 0, ICON_SIZE, ICON_SIZE);
+}
+
+// Quadcopter viewed from above: center body, four arms, four rotor circles.
+function buildDroneIcon(): ImageData {
+  const ctx = newIconCanvas();
+  const arms: [number, number][] = [
+    [7, 7],
+    [25, 7],
+    [7, 25],
+    [25, 25],
+  ];
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "white";
+  arms.forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.moveTo(16, 16);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  });
+  arms.forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  fillPolygon(ctx, [
+    [13, 13],
+    [19, 13],
+    [19, 19],
+    [13, 19],
+  ]);
+  return ctx.getImageData(0, 0, ICON_SIZE, ICON_SIZE);
+}
+
+const AIRCRAFT_ICON_BUILDER: Record<string, () => ImageData> = {
+  MILITARY: buildMilitaryIcon,
+  COMMERCIAL: buildCommercialIcon,
+  DRONE: buildDroneIcon,
+  UNKNOWN: buildUnknownIcon,
+};
 
 function toFeatureCollection(
   aircraft: Record<string, ReturnType<typeof useAircraftStore.getState>["aircraft"][string]>,
@@ -180,7 +284,9 @@ export default function Map() {
     };
 
     map.on("style.load", () => {
-      map.addImage(AIRCRAFT_ICON_ID, buildTriangleIcon(), { sdf: true });
+      Object.entries(AIRCRAFT_ICON_ID).forEach(([type, id]) => {
+        map.addImage(id, AIRCRAFT_ICON_BUILDER[type](), { sdf: true });
+      });
 
       map.addSource(CIRCLE_SOURCE_ID, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
       map.addLayer({
@@ -214,7 +320,17 @@ export default function Map() {
         type: "symbol",
         source: AIRCRAFT_SOURCE_ID,
         layout: {
-          "icon-image": AIRCRAFT_ICON_ID,
+          "icon-image": [
+            "match",
+            ["get", "aircraft_type"],
+            "MILITARY",
+            AIRCRAFT_ICON_ID.MILITARY,
+            "COMMERCIAL",
+            AIRCRAFT_ICON_ID.COMMERCIAL,
+            "DRONE",
+            AIRCRAFT_ICON_ID.DRONE,
+            AIRCRAFT_ICON_ID.UNKNOWN,
+          ],
           "icon-size": 0.6,
           "icon-rotate": ["get", "heading"],
           "icon-rotation-alignment": "map",
