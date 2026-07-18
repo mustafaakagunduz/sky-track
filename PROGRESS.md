@@ -43,18 +43,18 @@ only after it has been built **and verified working** (not just written).
 
 ---
 
-## Phase 3 — Polish & Delivery (not started)
+## Phase 3 — Polish & Delivery
 
 - [x] Dark/light theme toggle (Tailwind `class` strategy; map basemap switches too); default dark (verified in headless Chromium: toggle flips `html.dark`, panel/detail/nearby cards restyle, CARTO basemap swaps `dark_all` ↔ `light_all`, zero console errors)
 - [x] i18n: wrap all UI strings with react-i18next, single `en.json` (`src/locales/en.json`; all panel/detail/nearby/status strings routed through `useTranslation()`)
 - [x] Visual polish: consistent spacing/typography, transitions, loading/empty states — "command center" look (SkyTrack brand badge, detail-card fade-in, distinct "waiting for live data" vs "filters matched nothing" empty states; verified visually in headless Chromium, zero console errors)
 - [x] Tests: pytest (nearby endpoint radius correctness, simulator tick updates positions, list filter), Vitest (store updates on mocked WS message, one component test) — verified: `pytest` 6/6 passing + `ruff check` clean inside the backend container; `vitest run` 6/6 passing + `eslint`/`tsc -b` clean in the frontend
 - [x] GitHub Actions: ruff + pytest (backend), eslint + vitest (frontend) (`.github/workflows/ci.yml`; both jobs verified locally against a clean `python:3.12-slim` container with a real postgis service and a clean `node:20-slim` container, mirroring the exact CI steps — all green)
-- [ ] README: architecture diagram, screenshots/GIF placeholder, quickstart, env vars table, API summary
+- [x] README: architecture diagram, screenshots/GIF placeholder, quickstart, env vars table, API summary (mermaid diagram + real screenshots captured via headless Chromium, both themes + nearby search + detail card)
 
-**Acceptance criteria (target):**
-- [ ] CI green on `main`
-- [ ] README good enough for a stranger to run and understand in 5 minutes
+**Acceptance criteria — verified:**
+- [x] CI green on `main` (confirmed via `gh run watch` on the actual GitHub Actions run for the CI-workflow commit — both `backend` and `frontend` jobs passed)
+- [x] README good enough for a stranger to run and understand in 5 minutes (description, mermaid architecture diagram, real screenshots, quickstart, env vars table, API summary, testing instructions)
 
 ---
 
