@@ -1,15 +1,11 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { AircraftType, Classification } from "../types";
 import { useAircraftStore } from "../store/aircraftStore";
+import ThemeToggle from "./ThemeToggle";
 
 const AIRCRAFT_TYPES: AircraftType[] = ["MILITARY", "COMMERCIAL", "DRONE", "UNKNOWN"];
 const CLASSIFICATIONS: Classification[] = ["FRIENDLY", "HOSTILE", "NEUTRAL", "UNKNOWN"];
-
-const STATUS_LABEL: Record<string, string> = {
-  connecting: "Connecting...",
-  connected: "Connected",
-  disconnected: "Disconnected",
-};
 
 const STATUS_COLOR: Record<string, string> = {
   connecting: "bg-amber-400",
@@ -18,6 +14,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function AircraftPanel() {
+  const { t } = useTranslation();
   const aircraft = useAircraftStore((state) => state.aircraft);
   const wsStatus = useAircraftStore((state) => state.wsStatus);
   const filters = useAircraftStore((state) => state.filters);
@@ -33,32 +30,37 @@ export default function AircraftPanel() {
   }, [aircraft, filters]);
 
   return (
-    <div className="pointer-events-auto absolute right-0 top-0 z-10 flex h-full w-[26rem] flex-col rounded-l-md bg-slate-900/90 text-sm text-slate-100 shadow-lg backdrop-blur">
-      <div className="flex items-center justify-between border-b border-slate-700 px-3 py-2">
-        <span className="font-semibold">Aircraft ({rows.length})</span>
-        <span className="flex items-center gap-2 text-xs text-slate-300">
-          <span className={`h-2 w-2 rounded-full ${STATUS_COLOR[wsStatus]}`} />
-          {STATUS_LABEL[wsStatus]}
+    <div className="pointer-events-auto absolute right-0 top-0 z-10 flex h-full w-[26rem] flex-col rounded-l-md border-l border-slate-200 bg-white/90 text-sm text-slate-900 shadow-lg backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100">
+      <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+        <span className="font-semibold">
+          {t("panel.title")} ({rows.length})
         </span>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
+            <span className={`h-2 w-2 rounded-full ${STATUS_COLOR[wsStatus]}`} />
+            {t(`status.${wsStatus}`)}
+          </span>
+          <ThemeToggle />
+        </div>
       </div>
 
-      <div className="flex gap-2 border-b border-slate-700 px-3 py-2">
+      <div className="flex gap-2 border-b border-slate-200 px-3 py-2 dark:border-slate-700">
         <select
-          className="flex-1 rounded bg-slate-800 px-2 py-1 text-xs text-slate-100"
+          className="flex-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-900 dark:bg-slate-800 dark:text-slate-100"
           value={filters.aircraftType ?? ""}
           onChange={(e) =>
             setFilters({ aircraftType: (e.target.value || null) as AircraftType | null })
           }
         >
-          <option value="">All types</option>
+          <option value="">{t("panel.allTypes")}</option>
           {AIRCRAFT_TYPES.map((type) => (
             <option key={type} value={type}>
-              {type}
+              {t(`aircraftType.${type}`)}
             </option>
           ))}
         </select>
         <select
-          className="flex-1 rounded bg-slate-800 px-2 py-1 text-xs text-slate-100"
+          className="flex-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-900 dark:bg-slate-800 dark:text-slate-100"
           value={filters.classification ?? ""}
           onChange={(e) =>
             setFilters({
@@ -66,10 +68,10 @@ export default function AircraftPanel() {
             })
           }
         >
-          <option value="">All classes</option>
+          <option value="">{t("panel.allClasses")}</option>
           {CLASSIFICATIONS.map((classification) => (
             <option key={classification} value={classification}>
-              {classification}
+              {t(`classification.${classification}`)}
             </option>
           ))}
         </select>
@@ -77,17 +79,17 @@ export default function AircraftPanel() {
 
       <div className="overflow-y-auto">
         {rows.length === 0 ? (
-          <div className="px-3 py-6 text-center text-slate-400">
-            No aircraft match the current filters.
+          <div className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+            {t("panel.empty")}
           </div>
         ) : (
           <table className="w-full text-left text-xs">
-            <thead className="sticky top-0 bg-slate-900/95 text-slate-400">
+            <thead className="sticky top-0 bg-white/95 text-slate-500 dark:bg-slate-900/95 dark:text-slate-400">
               <tr>
-                <th className="px-3 py-1 font-medium">Callsign</th>
-                <th className="px-3 py-1 font-medium">Type</th>
-                <th className="px-3 py-1 font-medium">Class</th>
-                <th className="px-3 py-1 font-medium">Lat/Lon</th>
+                <th className="px-3 py-1 font-medium">{t("panel.columnCallsign")}</th>
+                <th className="px-3 py-1 font-medium">{t("panel.columnType")}</th>
+                <th className="px-3 py-1 font-medium">{t("panel.columnClass")}</th>
+                <th className="px-3 py-1 font-medium">{t("panel.columnPosition")}</th>
               </tr>
             </thead>
             <tbody>
@@ -95,13 +97,13 @@ export default function AircraftPanel() {
                 <tr
                   key={a.callsign}
                   onClick={() => setSelectedCallsign(a.callsign)}
-                  className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800 ${
-                    selectedCallsign === a.callsign ? "bg-slate-700" : ""
+                  className={`cursor-pointer border-t border-slate-100 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800 ${
+                    selectedCallsign === a.callsign ? "bg-slate-200 dark:bg-slate-700" : ""
                   }`}
                 >
                   <td className="px-3 py-1">{a.callsign}</td>
-                  <td className="px-3 py-1">{a.aircraft_type}</td>
-                  <td className="px-3 py-1">{a.classification}</td>
+                  <td className="px-3 py-1">{t(`aircraftType.${a.aircraft_type}`)}</td>
+                  <td className="px-3 py-1">{t(`classification.${a.classification}`)}</td>
                   <td className="px-3 py-1">
                     {a.lat.toFixed(2)}, {a.lon.toFixed(2)}
                   </td>

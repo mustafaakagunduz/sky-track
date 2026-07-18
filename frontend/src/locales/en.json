@@ -1,0 +1,55 @@
+{
+  "theme": {
+    "toggle": "Toggle dark / light theme"
+  },
+  "status": {
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "panel": {
+    "title": "Aircraft",
+    "allTypes": "All types",
+    "allClasses": "All classes",
+    "empty": "No aircraft match the current filters.",
+    "columnCallsign": "Callsign",
+    "columnType": "Type",
+    "columnClass": "Class",
+    "columnPosition": "Lat/Lon"
+  },
+  "aircraftType": {
+    "MILITARY": "Military",
+    "COMMERCIAL": "Commercial",
+    "DRONE": "Drone",
+    "UNKNOWN": "Unknown"
+  },
+  "classification": {
+    "FRIENDLY": "Friendly",
+    "HOSTILE": "Hostile",
+    "NEUTRAL": "Neutral",
+    "UNKNOWN": "Unknown"
+  },
+  "detail": {
+    "close": "Close",
+    "gone": "This aircraft is no longer reporting.",
+    "type": "Type",
+    "classification": "Classification",
+    "position": "Position",
+    "altitude": "Altitude",
+    "heading": "Heading",
+    "speed": "Speed",
+    "trailLoading": "Loading trail…",
+    "trailError": "Failed to load trail."
+  },
+  "nearby": {
+    "title": "Nearby search",
+    "on": "On",
+    "off": "Off",
+    "radius": "Radius",
+    "prompt": "Click the map to search around a point.",
+    "searching": "Searching…",
+    "error": "Failed to fetch nearby aircraft.",
+    "empty": "No aircraft found within radius.",
+    "results": "{{count}} aircraft within {{radius}} km."
+  }
+}

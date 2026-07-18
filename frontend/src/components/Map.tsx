@@ -1,8 +1,10 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef } from "react";
+import i18n from "../i18n";
 import { fetchNearby } from "../api";
 import { useAircraftStore } from "../store/aircraftStore";
+import { useThemeStore, type Theme } from "../store/themeStore";
 
 const AIRCRAFT_SOURCE_ID = "aircraft";
 const AIRCRAFT_LAYER_ID = "aircraft-layer";
@@ -99,6 +101,26 @@ function circlePolygon(centerLat: number, centerLon: number, radiusKm: number) {
 
 const EMPTY_FEATURE_COLLECTION = { type: "FeatureCollection" as const, features: [] };
 
+function buildMapStyle(theme: Theme): maplibregl.StyleSpecification {
+  const variant = theme === "dark" ? "dark_all" : "light_all";
+  return {
+    version: 8,
+    sources: {
+      basemap: {
+        type: "raster",
+        tiles: [
+          `https://a.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}{r}.png`,
+          `https://b.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}{r}.png`,
+          `https://c.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}{r}.png`,
+        ],
+        tileSize: 256,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+      },
+    },
+    layers: [{ id: "basemap", type: "raster", source: "basemap" }],
+  };
+}
+
 export default function Map() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -108,28 +130,56 @@ export default function Map() {
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          basemap: {
-            type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-              "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-              "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-            ],
-            tileSize: 256,
-            attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
-          },
-        },
-        layers: [{ id: "basemap", type: "raster", source: "basemap" }],
-      },
+      style: buildMapStyle(useThemeStore.getState().theme),
       center: [28.9, 40.9],
       zoom: 8,
     });
     mapRef.current = map;
 
-    map.on("load", () => {
+    const applyState = (state: ReturnType<typeof useAircraftStore.getState>) => {
+      const aircraftSource = map.getSource(AIRCRAFT_SOURCE_ID) as
+        | maplibregl.GeoJSONSource
+        | undefined;
+      if (!aircraftSource) return;
+      aircraftSource.setData(toFeatureCollection(state.aircraft) as GeoJSON.FeatureCollection);
+
+      const trailSource = map.getSource(TRAIL_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+      trailSource?.setData(
+        (state.selectedCallsign
+          ? toTrailFeatureCollection(state.trail)
+          : EMPTY_FEATURE_COLLECTION) as GeoJSON.FeatureCollection,
+      );
+
+      const circleSource = map.getSource(CIRCLE_SOURCE_ID) as
+        | maplibregl.GeoJSONSource
+        | undefined;
+      circleSource?.setData(
+        (state.nearby.center
+          ? circlePolygon(state.nearby.center.lat, state.nearby.center.lon, state.nearby.radiusKm)
+          : EMPTY_FEATURE_COLLECTION) as GeoJSON.FeatureCollection,
+      );
+
+      map.setLayoutProperty(AIRCRAFT_LAYER_ID, "icon-size", [
+        "case",
+        ["==", ["get", "callsign"], state.selectedCallsign ?? ""],
+        0.95,
+        0.6,
+      ]);
+
+      if (state.nearby.results) {
+        const matching = state.nearby.results.map((r) => r.callsign);
+        map.setPaintProperty(AIRCRAFT_LAYER_ID, "icon-opacity", [
+          "case",
+          ["in", ["get", "callsign"], ["literal", matching]],
+          1,
+          0.25,
+        ]);
+      } else {
+        map.setPaintProperty(AIRCRAFT_LAYER_ID, "icon-opacity", 1);
+      }
+    };
+
+    map.on("style.load", () => {
       map.addImage(AIRCRAFT_ICON_ID, buildTriangleIcon(), { sdf: true });
 
       map.addSource(CIRCLE_SOURCE_ID, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
@@ -185,89 +235,49 @@ export default function Map() {
         },
       });
 
-      map.on("click", AIRCRAFT_LAYER_ID, (e) => {
-        if (useAircraftStore.getState().nearby.active) return;
-        const feature = e.features?.[0];
-        const callsign = feature?.properties?.callsign;
-        if (callsign) {
-          useAircraftStore.getState().setSelectedCallsign(callsign);
-        }
-      });
-
-      map.on("mouseenter", AIRCRAFT_LAYER_ID, () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", AIRCRAFT_LAYER_ID, () => {
-        map.getCanvas().style.cursor = "";
-      });
-
-      map.on("click", (e) => {
-        const { nearby } = useAircraftStore.getState();
-        if (!nearby.active) return;
-
-        const lat = e.lngLat.lat;
-        const lon = e.lngLat.lng;
-        useAircraftStore.getState().setNearbyCenter({ lat, lon });
-        useAircraftStore.getState().setNearbyLoading(true);
-        useAircraftStore.getState().setNearbyError(null);
-
-        fetchNearby(lat, lon, useAircraftStore.getState().nearby.radiusKm)
-          .then((results) => useAircraftStore.getState().setNearbyResults(results))
-          .catch(() => useAircraftStore.getState().setNearbyError("Failed to fetch nearby aircraft."))
-          .finally(() => useAircraftStore.getState().setNearbyLoading(false));
-      });
-
-      const applyState = (state: ReturnType<typeof useAircraftStore.getState>) => {
-        const aircraftSource = map.getSource(AIRCRAFT_SOURCE_ID) as
-          | maplibregl.GeoJSONSource
-          | undefined;
-        aircraftSource?.setData(toFeatureCollection(state.aircraft) as GeoJSON.FeatureCollection);
-
-        const trailSource = map.getSource(TRAIL_SOURCE_ID) as
-          | maplibregl.GeoJSONSource
-          | undefined;
-        trailSource?.setData(
-          (state.selectedCallsign
-            ? toTrailFeatureCollection(state.trail)
-            : EMPTY_FEATURE_COLLECTION) as GeoJSON.FeatureCollection,
-        );
-
-        const circleSource = map.getSource(CIRCLE_SOURCE_ID) as
-          | maplibregl.GeoJSONSource
-          | undefined;
-        circleSource?.setData(
-          (state.nearby.center
-            ? circlePolygon(state.nearby.center.lat, state.nearby.center.lon, state.nearby.radiusKm)
-            : EMPTY_FEATURE_COLLECTION) as GeoJSON.FeatureCollection,
-        );
-
-        map.setLayoutProperty(AIRCRAFT_LAYER_ID, "icon-size", [
-          "case",
-          ["==", ["get", "callsign"], state.selectedCallsign ?? ""],
-          0.95,
-          0.6,
-        ]);
-
-        if (state.nearby.results) {
-          const matching = state.nearby.results.map((r) => r.callsign);
-          map.setPaintProperty(AIRCRAFT_LAYER_ID, "icon-opacity", [
-            "case",
-            ["in", ["get", "callsign"], ["literal", matching]],
-            1,
-            0.25,
-          ]);
-        } else {
-          map.setPaintProperty(AIRCRAFT_LAYER_ID, "icon-opacity", 1);
-        }
-      };
-
       applyState(useAircraftStore.getState());
-      const unsubscribe = useAircraftStore.subscribe(applyState);
+    });
 
-      map.once("remove", unsubscribe);
+    map.on("click", AIRCRAFT_LAYER_ID, (e) => {
+      if (useAircraftStore.getState().nearby.active) return;
+      const feature = e.features?.[0];
+      const callsign = feature?.properties?.callsign;
+      if (callsign) {
+        useAircraftStore.getState().setSelectedCallsign(callsign);
+      }
+    });
+
+    map.on("mouseenter", AIRCRAFT_LAYER_ID, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", AIRCRAFT_LAYER_ID, () => {
+      map.getCanvas().style.cursor = "";
+    });
+
+    map.on("click", (e) => {
+      const { nearby } = useAircraftStore.getState();
+      if (!nearby.active) return;
+
+      const lat = e.lngLat.lat;
+      const lon = e.lngLat.lng;
+      useAircraftStore.getState().setNearbyCenter({ lat, lon });
+      useAircraftStore.getState().setNearbyLoading(true);
+      useAircraftStore.getState().setNearbyError(null);
+
+      fetchNearby(lat, lon, useAircraftStore.getState().nearby.radiusKm)
+        .then((results) => useAircraftStore.getState().setNearbyResults(results))
+        .catch(() => useAircraftStore.getState().setNearbyError(i18n.t("nearby.error")))
+        .finally(() => useAircraftStore.getState().setNearbyLoading(false));
+    });
+
+    const unsubscribeAircraft = useAircraftStore.subscribe(applyState);
+    const unsubscribeTheme = useThemeStore.subscribe((state) => {
+      map.setStyle(buildMapStyle(state.theme));
     });
 
     return () => {
+      unsubscribeAircraft();
+      unsubscribeTheme();
       map.remove();
       mapRef.current = null;
     };

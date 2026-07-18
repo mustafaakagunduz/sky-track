@@ -45,8 +45,8 @@ only after it has been built **and verified working** (not just written).
 
 ## Phase 3 — Polish & Delivery (not started)
 
-- [ ] Dark/light theme toggle (Tailwind `class` strategy; map basemap switches too); default dark
-- [ ] i18n: wrap all UI strings with react-i18next, single `en.json`
+- [x] Dark/light theme toggle (Tailwind `class` strategy; map basemap switches too); default dark (verified in headless Chromium: toggle flips `html.dark`, panel/detail/nearby cards restyle, CARTO basemap swaps `dark_all` ↔ `light_all`, zero console errors)
+- [x] i18n: wrap all UI strings with react-i18next, single `en.json` (`src/locales/en.json`; all panel/detail/nearby/status strings routed through `useTranslation()`)
 - [ ] Visual polish: consistent spacing/typography, transitions, loading/empty states — "command center" look
 - [ ] Tests: pytest (nearby endpoint radius correctness, simulator tick updates positions, list filter), Vitest (store updates on mocked WS message, one component test)
 - [ ] GitHub Actions: ruff + pytest (backend), eslint + vitest (frontend)
