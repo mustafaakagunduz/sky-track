@@ -49,7 +49,7 @@ only after it has been built **and verified working** (not just written).
 - [x] i18n: wrap all UI strings with react-i18next, single `en.json` (`src/locales/en.json`; all panel/detail/nearby/status strings routed through `useTranslation()`)
 - [x] Visual polish: consistent spacing/typography, transitions, loading/empty states — "command center" look (SkyTrack brand badge, detail-card fade-in, distinct "waiting for live data" vs "filters matched nothing" empty states; verified visually in headless Chromium, zero console errors)
 - [x] Tests: pytest (nearby endpoint radius correctness, simulator tick updates positions, list filter), Vitest (store updates on mocked WS message, one component test) — verified: `pytest` 6/6 passing + `ruff check` clean inside the backend container; `vitest run` 6/6 passing + `eslint`/`tsc -b` clean in the frontend
-- [ ] GitHub Actions: ruff + pytest (backend), eslint + vitest (frontend)
+- [x] GitHub Actions: ruff + pytest (backend), eslint + vitest (frontend) (`.github/workflows/ci.yml`; both jobs verified locally against a clean `python:3.12-slim` container with a real postgis service and a clean `node:20-slim` container, mirroring the exact CI steps — all green)
 - [ ] README: architecture diagram, screenshots/GIF placeholder, quickstart, env vars table, API summary
 
 **Acceptance criteria (target):**
