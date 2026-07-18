@@ -14,7 +14,7 @@ only after it has been built **and verified working** (not just written).
 - [x] Channels consumer at `/ws/aircraft/` relaying `aircraft_updates` group broadcasts to clients; ASGI setup via Daphne (`daphne` runserver override)
 - [x] DRF: `GET /api/aircraft/` (list, filterable by `aircraft_type`/`classification`), `GET /api/aircraft/{callsign}/` (detail)
 - [x] Frontend: Vite + Tailwind (dark) + MapLibre full-screen map (CARTO dark raster basemap, no API key), WebSocket client (native WS + Zustand store, auto-reconnect), aircraft rendered as symbol layer, rotated by heading, colored by classification (green/red/blue/gray)
-- [x] Status bar: WebSocket connection state + live aircraft count
+- [x] Status indicator: WebSocket connection state + live aircraft count (originally a standalone status bar; now integrated into the aircraft panel header — see Phase 2 layout notes)
 
 **Acceptance criteria — verified:**
 - [x] `docker-compose up` (this machine has the standalone binary, not the `docker compose` plugin) brings up all 5 services; migrations auto-run on backend/ingest start
@@ -35,6 +35,7 @@ only after it has been built **and verified working** (not just written).
 - [x] Radius search: click a point, choose radius (10–200 km slider), backend `GET /api/aircraft/nearby/?lat=&lon=&radius_km=` via PostGIS (`ST_DWithin`/`Distance` annotation), visualize circle + highlighted results
 - [x] OpenSky ingestion mode (`DATA_SOURCE=opensky`) with automatic fallback to simulator on failure
 - [x] Basic error/empty states in UI (empty filtered list, trail fetch failure, nearby search error/empty)
+- [x] Layout iteration after user review: aircraft panel moved to a wide, right-anchored, full-height column with the WebSocket status/count folded into its header; detail card moved to top-left; "Nearby search" control kept alone at bottom-left (standalone `StatusBar` component removed, superseded by the panel header)
 
 **Acceptance criteria — verified:**
 - [x] Filters, selection, trail, and radius search all work without page reloads (Playwright-driven browser test: filter narrowed 80→20 aircraft, selection opened detail card + fetched trail, nearby search drew a circle, dimmed non-matching aircraft, and re-queried live when the radius slider moved — 13→44 results — with zero console errors)

@@ -3,7 +3,6 @@ import AircraftPanel from "./components/AircraftPanel";
 import DetailCard from "./components/DetailCard";
 import Map from "./components/Map";
 import RadiusSearchControl from "./components/RadiusSearchControl";
-import StatusBar from "./components/StatusBar";
 import { connectAircraftSocket } from "./ws";
 
 export default function App() {
@@ -16,8 +15,9 @@ export default function App() {
       <Map />
       <AircraftPanel />
       <DetailCard />
-      <RadiusSearchControl />
-      <StatusBar />
+      <div className="pointer-events-none absolute bottom-4 left-4 z-10">
+        <RadiusSearchControl />
+      </div>
     </div>
   );
 }

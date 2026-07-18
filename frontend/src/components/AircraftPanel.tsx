@@ -5,8 +5,21 @@ import { useAircraftStore } from "../store/aircraftStore";
 const AIRCRAFT_TYPES: AircraftType[] = ["MILITARY", "COMMERCIAL", "DRONE", "UNKNOWN"];
 const CLASSIFICATIONS: Classification[] = ["FRIENDLY", "HOSTILE", "NEUTRAL", "UNKNOWN"];
 
+const STATUS_LABEL: Record<string, string> = {
+  connecting: "Connecting...",
+  connected: "Connected",
+  disconnected: "Disconnected",
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  connecting: "bg-amber-400",
+  connected: "bg-emerald-400",
+  disconnected: "bg-red-500",
+};
+
 export default function AircraftPanel() {
   const aircraft = useAircraftStore((state) => state.aircraft);
+  const wsStatus = useAircraftStore((state) => state.wsStatus);
   const filters = useAircraftStore((state) => state.filters);
   const setFilters = useAircraftStore((state) => state.setFilters);
   const selectedCallsign = useAircraftStore((state) => state.selectedCallsign);
@@ -20,9 +33,13 @@ export default function AircraftPanel() {
   }, [aircraft, filters]);
 
   return (
-    <div className="pointer-events-auto absolute left-4 top-4 z-10 flex max-h-[calc(100vh-2rem)] w-80 flex-col rounded-md bg-slate-900/90 text-sm text-slate-100 shadow-lg backdrop-blur">
+    <div className="pointer-events-auto absolute right-0 top-0 z-10 flex h-full w-[26rem] flex-col rounded-l-md bg-slate-900/90 text-sm text-slate-100 shadow-lg backdrop-blur">
       <div className="flex items-center justify-between border-b border-slate-700 px-3 py-2">
         <span className="font-semibold">Aircraft ({rows.length})</span>
+        <span className="flex items-center gap-2 text-xs text-slate-300">
+          <span className={`h-2 w-2 rounded-full ${STATUS_COLOR[wsStatus]}`} />
+          {STATUS_LABEL[wsStatus]}
+        </span>
       </div>
 
       <div className="flex gap-2 border-b border-slate-700 px-3 py-2">

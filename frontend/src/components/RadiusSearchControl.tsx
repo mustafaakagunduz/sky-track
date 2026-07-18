@@ -33,7 +33,7 @@ export default function RadiusSearchControl() {
   }, [nearby.radiusKm]);
 
   return (
-    <div className="pointer-events-auto absolute bottom-4 right-4 z-10 w-64 rounded-md bg-slate-900/90 p-3 text-sm text-slate-100 shadow-lg backdrop-blur">
+    <div className="pointer-events-auto w-64 rounded-md bg-slate-900/90 p-3 text-sm text-slate-100 shadow-lg backdrop-blur">
       <div className="flex items-center justify-between">
         <span className="font-semibold">Nearby search</span>
         <button
