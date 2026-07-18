@@ -7,6 +7,7 @@ This project is built strictly according to `PROJECT_PLAN.md`. Read it before do
 - **Never start a new phase without explicit user approval** (the user will say something like "start Phase 2").
 - When a phase is complete: stop, summarize what was built, explain how the user can verify the acceptance criteria (exact commands/URLs), and wait.
 - If you finish early or something seems missing from the plan, ask — do not invent new scope.
+- Track actual progress in root `PROGRESS.md`. The moment a task item is completed **and you have verified it actually works** (not just written the code — run it, curl it, check the logs), immediately check it off (`[ ]` → `[x]`) in `PROGRESS.md`. Never check something off speculatively or before verifying.
 
 ## General rules
 - Respect the "Out of Scope" section of the plan. Do not add auth, Celery, SSR, or anything listed there.
