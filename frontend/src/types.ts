@@ -16,3 +16,14 @@ export interface PositionsMessage {
   type: "positions";
   aircraft: AircraftPosition[];
 }
+
+export interface TrackPoint {
+  lat: number;
+  lon: number;
+  altitude: number;
+  timestamp: string;
+}
+
+export interface NearbyAircraft extends AircraftPosition {
+  distance_km: number;
+}
