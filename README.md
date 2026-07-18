@@ -9,15 +9,7 @@ command-center look.
 Portfolio project. KISS on purpose: no auth, no microservices, no
 Celery, no Kubernetes.
 
-![Dark mode — nearby search + detail card](docs/screenshots/dark-nearby.png)
-
-<details>
-<summary>More screenshots (light mode, detail card)</summary>
-
-![Dark mode](docs/screenshots/dark.png)
-![Light mode](docs/screenshots/light.png)
-
-</details>
+![SkyTrack — live aircraft over the Marmara region](docs/screenshots/dark.png)
 
 ## Architecture
 
