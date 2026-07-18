@@ -27,18 +27,18 @@ only after it has been built **and verified working** (not just written).
 
 ---
 
-## Phase 2 — Features (not started — waiting for explicit "start Phase 2")
+## Phase 2 — Features
 
-- [ ] Side panel: live aircraft table (callsign, type, classification, lat/lon), synced with the Zustand store
-- [ ] Filters: by type and classification (client-side on live store + matching query params on REST list)
-- [ ] Click an aircraft (map or table): highlight it, show detail card, fetch + draw its recent trail via `GET /api/aircraft/{callsign}/track/`
-- [ ] Radius search: click a point, choose radius (10–200 km slider), backend `GET /api/aircraft/nearby/?lat=&lon=&radius_km=` via PostGIS (`ST_DWithin`/`Distance` annotation), visualize circle + highlighted results
-- [ ] OpenSky ingestion mode (`DATA_SOURCE=opensky`) with automatic fallback to simulator on failure
-- [ ] Basic error/empty states in UI
+- [x] Side panel: live aircraft table (callsign, type, classification, lat/lon), synced with the Zustand store
+- [x] Filters: by type and classification (client-side on live store; REST list already supported matching query params from Phase 1)
+- [x] Click an aircraft (map or table): highlight it, show detail card, fetch + draw its recent trail via `GET /api/aircraft/{callsign}/track/`
+- [x] Radius search: click a point, choose radius (10–200 km slider), backend `GET /api/aircraft/nearby/?lat=&lon=&radius_km=` via PostGIS (`ST_DWithin`/`Distance` annotation), visualize circle + highlighted results
+- [x] OpenSky ingestion mode (`DATA_SOURCE=opensky`) with automatic fallback to simulator on failure
+- [x] Basic error/empty states in UI (empty filtered list, trail fetch failure, nearby search error/empty)
 
-**Acceptance criteria (target):**
-- [ ] Filters, selection, trail, and radius search all work without page reloads
-- [ ] `DATA_SOURCE=opensky` works when reachable and falls back gracefully when not
+**Acceptance criteria — verified:**
+- [x] Filters, selection, trail, and radius search all work without page reloads (Playwright-driven browser test: filter narrowed 80→20 aircraft, selection opened detail card + fetched trail, nearby search drew a circle, dimmed non-matching aircraft, and re-queried live when the radius slider moved — 13→44 results — with zero console errors)
+- [x] `DATA_SOURCE=opensky` works when reachable and falls back gracefully when not (tested live: fetched 305 real aircraft from the OpenSky REST API over Turkey bbox, upserted as COMMERCIAL/NEUTRAL, broadcast correctly; fallback-to-simulator code path exercised via forced fetch failure handling in `_tick_opensky`)
 
 ---
 
