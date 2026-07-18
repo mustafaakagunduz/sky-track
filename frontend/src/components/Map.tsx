@@ -272,7 +272,7 @@ export default function Map() {
 
     const unsubscribeAircraft = useAircraftStore.subscribe(applyState);
     const unsubscribeTheme = useThemeStore.subscribe((state) => {
-      map.setStyle(buildMapStyle(state.theme));
+      map.setStyle(buildMapStyle(state.theme), { diff: false });
     });
 
     return () => {
